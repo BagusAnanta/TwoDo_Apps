@@ -1,6 +1,7 @@
 package com.example.twodoapps
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -31,6 +33,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -123,23 +126,31 @@ fun ContentApp(data : List<Twododata>, innerPaddingValues : PaddingValues, modif
     var isTaskDone by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
     var visible by remember { mutableStateOf(false) }
+    var id by remember { mutableStateOf("") }
 
-    // Lazycolumn -> if you make list column, you use LazyColumn
+    // LazyColumn -> if you make list column, you use LazyColumn
     LazyColumn(
         contentPadding = innerPaddingValues,
-        modifier = Modifier.padding(10.dp),
+        modifier = Modifier
+            .padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(15.dp)
     ) {
         items(data){
-            Card(
+            ElevatedCard(
                 elevation = CardDefaults.elevatedCardElevation(
                     defaultElevation = 6.dp
                 ),
                 modifier = modifier
                     .fillMaxWidth()
-                    .animateContentSize()
-                    .height(if(expanded) 140.dp else 50.dp),
+                    .animateContentSize(),
                 onClick = {
+                    // you should add if statement, where user choose data
+                    // like if user only choose what user want, we must open a card what user choose
+                    // but we must need know how get user choose index and open card with user choose
+                    // maybe we can get specific data from id
+                    // place Id at here
+                    id = it.id
+
                     expanded = !expanded
                 }
             ){
@@ -178,6 +189,10 @@ fun ContentApp(data : List<Twododata>, innerPaddingValues : PaddingValues, modif
                             )
                         }
                     }
+
+                    if(expanded && id == it.id){
+                        Text("Hello World")
+                    }
                 }
             }
         }
@@ -186,7 +201,7 @@ fun ContentApp(data : List<Twododata>, innerPaddingValues : PaddingValues, modif
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun GreetingPreview() {
+fun AppsPreview() {
     TwoDoAppsTheme {
         TopAndBottomComponent()
     }
