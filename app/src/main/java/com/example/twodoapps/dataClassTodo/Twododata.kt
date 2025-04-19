@@ -1,4 +1,4 @@
-package dataClassTodo
+package com.example.twodoapps.dataClassTodo
 
 data class Twododata(
     var id : String = "",

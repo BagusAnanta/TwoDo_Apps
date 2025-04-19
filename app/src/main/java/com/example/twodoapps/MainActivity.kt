@@ -1,8 +1,11 @@
 package com.example.twodoapps
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.animateContentSize
@@ -11,15 +14,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedCard
@@ -33,12 +33,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -47,7 +47,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.twodoapps.ui.theme.TwoDoAppsTheme
-import dataClassTodo.Twododata
+import com.example.twodoapps.dataClassTodo.Twododata
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,6 +66,8 @@ class MainActivity : ComponentActivity() {
 fun TopAndBottomComponent(modifier: Modifier = Modifier) {
     // make scrollable on
     val topBarScrollBehaviour = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+    val activity : Activity? = LocalActivity.current
+    val context : Context = LocalContext.current
 
     // make scaffold in here
     Scaffold(
@@ -86,7 +88,11 @@ fun TopAndBottomComponent(modifier: Modifier = Modifier) {
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = {
-                    /*Do Something*/
+                    val intent = Intent(context,CreateTwoDo::class.java)
+                    activity?.apply {
+                        startActivity(intent)
+                        // finish()
+                    }
                 },
             ){
                 Icon(
@@ -121,7 +127,6 @@ fun exampleDataList() : List<Twododata>{
 fun ContentApp(data : List<Twododata>, innerPaddingValues : PaddingValues, modifier : Modifier = Modifier){
 
     // for state
-
     // for state done, get data from API
     var isTaskDone by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
@@ -144,13 +149,8 @@ fun ContentApp(data : List<Twododata>, innerPaddingValues : PaddingValues, modif
                     .fillMaxWidth()
                     .animateContentSize(),
                 onClick = {
-                    // you should add if statement, where user choose data
-                    // like if user only choose what user want, we must open a card what user choose
-                    // but we must need know how get user choose index and open card with user choose
-                    // maybe we can get specific data from id
-                    // place Id at here
+                    // place id at here for change value and save id where user choose
                     id = it.id
-
                     expanded = !expanded
                 }
             ){
@@ -191,6 +191,7 @@ fun ContentApp(data : List<Twododata>, innerPaddingValues : PaddingValues, modif
                     }
 
                     if(expanded && id == it.id){
+                        // place expandable component at here
                         Text("Hello World")
                     }
                 }

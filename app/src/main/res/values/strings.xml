@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">TwoDo Apps</string>
+    <string name="title_activity_create_two_do">CreateTwoDo</string>
+    <string name="title_activity_login">LoginActivity</string>
 </resources>
