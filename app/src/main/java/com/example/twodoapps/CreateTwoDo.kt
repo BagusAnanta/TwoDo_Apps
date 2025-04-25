@@ -129,6 +129,7 @@ fun CreateContentApp(innerPaddingValue : PaddingValues, modifier : Modifier = Mo
                 /*do anything*/
                 if(twoDoTitle.isNotEmpty()){
                     // if a state not empty
+                    // save on API
                 }
             },
             shape = RoundedCornerShape(20.dp),

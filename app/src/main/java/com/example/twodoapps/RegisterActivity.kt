@@ -25,14 +25,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.twodoapps.ui.theme.TwoDoAppsTheme
 
-class LoginActivity : ComponentActivity() {
+class RegisterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             TwoDoAppsTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    ComponentApp(
+                    ComponentAppRegister(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -42,7 +42,7 @@ class LoginActivity : ComponentActivity() {
 }
 
 @Composable
-fun ComponentApp(modifier: Modifier = Modifier) {
+fun ComponentAppRegister(modifier: Modifier = Modifier) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -76,21 +76,13 @@ fun ComponentApp(modifier: Modifier = Modifier) {
             Text("Login")
         }
 
-        Text("or")
-
-        Button(
-            onClick = { /* Handle register button click */ },
-            modifier = modifier.fillMaxWidth()
-        ) {
-            Text("Register")
-        }
     }
 }
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun GreetingPreview() {
+fun GreetingPreview2() {
     TwoDoAppsTheme {
-        ComponentApp()
+        ComponentAppRegister()
     }
 }

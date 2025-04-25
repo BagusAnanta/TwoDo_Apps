@@ -13,13 +13,21 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedCard
@@ -27,8 +35,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -38,9 +49,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -85,27 +98,6 @@ fun TopAndBottomComponent(modifier: Modifier = Modifier) {
                 scrollBehavior = topBarScrollBehaviour
             )
         },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = {
-                    val intent = Intent(context,CreateTwoDo::class.java)
-                    activity?.apply {
-                        startActivity(intent)
-                        // finish()
-                    }
-                },
-            ){
-                Icon(
-                    imageVector = Icons.Filled.Create,
-                    contentDescription = "CreateButton",
-                    modifier = modifier.padding(end = 10.dp)
-                )
-
-                Text(
-                    text = "Write ToDo"
-                )
-            }
-        }
     ) { innerPadding ->
         ContentApp(
             data = exampleDataList(),
@@ -123,6 +115,7 @@ fun exampleDataList() : List<Twododata>{
     )
 }
 
+
 @Composable
 fun ContentApp(data : List<Twododata>, innerPaddingValues : PaddingValues, modifier : Modifier = Modifier){
 
@@ -133,66 +126,211 @@ fun ContentApp(data : List<Twododata>, innerPaddingValues : PaddingValues, modif
     var visible by remember { mutableStateOf(false) }
     var id by remember { mutableStateOf("") }
 
-    // LazyColumn -> if you make list column, you use LazyColumn
-    LazyColumn(
-        contentPadding = innerPaddingValues,
-        modifier = Modifier
-            .padding(10.dp),
-        verticalArrangement = Arrangement.spacedBy(15.dp)
-    ) {
-        items(data){
-            ElevatedCard(
-                elevation = CardDefaults.elevatedCardElevation(
-                    defaultElevation = 6.dp
-                ),
-                modifier = modifier
-                    .fillMaxWidth()
-                    .animateContentSize(),
-                onClick = {
-                    // place id at here for change value and save id where user choose
-                    id = it.id
-                    expanded = !expanded
-                }
-            ){
-                Column(
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .padding(all = 5.dp)
-                ){
-                    Row(
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .wrapContentWidth(Alignment.CenterHorizontally)
-                    ) {
-                        // title on right, done task on right
-                        Text(
-                            text = it.name,
-                            style = TextStyle(
-                                fontStyle = FontStyle.Normal,
-                                fontWeight = FontWeight.SemiBold
-                            ),
-                            modifier = modifier.align(Alignment.CenterVertically)
-                        )
+    var twoDoTitleUpdate by remember { mutableStateOf("") }
 
+    var twoDoTitle by remember { mutableStateOf("") }
+
+    Column(
+        modifier = Modifier.padding(innerPaddingValues)
+    ) {
+
+        Card(
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 6.dp
+            ),
+            modifier = modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .padding(10.dp)
+        ) {
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(top = 10.dp),
+            ) {
+                Text(
+                    text = "Create ToDo",
+                    modifier = modifier.padding(start = 10.dp, end = 10.dp),
+                    style = TextStyle(
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace
+                    )
+                )
+
+                Spacer(modifier = modifier.padding(top = 5.dp))
+
+                Text(
+                    text = "Create you ToDo at Here !",
+                    modifier = modifier.padding(start = 10.dp, end = 10.dp),
+                    style = TextStyle(
+                        fontSize = 15.sp,
+                        fontStyle = FontStyle.Italic)
+                )
+
+                Spacer(modifier = modifier.padding(top = 10.dp))
+
+                OutlinedTextField(
+                    value = twoDoTitle,
+                    onValueChange = {
+                        twoDoTitle = it
+                    },
+                    label = {
+                        Text("What your plan ?")
+                    },
+                    trailingIcon = {
                         IconButton(
                             onClick = {
-                                isTaskDone = !isTaskDone
-                            },
-                            modifier = modifier
-                                .fillMaxWidth()
-                                .wrapContentWidth(Alignment.End)
+                                /*do anything*/
+                                if(twoDoTitle.isNotEmpty()){
+                                    // if a state not empty
+                                    // save on API
+                                }
+                            }
                         ) {
-                            // icon
                             Icon(
-                                painter = if(isTaskDone) painterResource(R.drawable.done_uncheck) else painterResource(R.drawable.done_check),
-                                contentDescription = "Done"
+                                imageVector = Icons.Filled.Create,
+                                contentDescription = "CreateButton"
                             )
                         }
-                    }
+                    },
+                    modifier = modifier
+                        .padding(start = 10.dp, end = 10.dp, bottom = 10.dp)
+                        .fillMaxWidth()
+                )
+            }
+        }
 
-                    if(expanded && id == it.id){
-                        // place expandable component at here
-                        Text("Hello World")
+        Text(
+            text = "Your Plan",
+            modifier = modifier.padding(10.dp),
+            style = TextStyle(fontWeight = FontWeight.Bold)
+        )
+
+        // LazyColumn -> if you make list column, you use LazyColumn
+        LazyColumn(
+            modifier = Modifier
+                .padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(15.dp)
+        ) {
+            items(data){
+                ElevatedCard(
+                    elevation = CardDefaults.elevatedCardElevation(
+                        defaultElevation = 6.dp
+                    ),
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .animateContentSize(),
+                    onClick = {
+                        // place id at here for change value and save id where user choose
+                        id = it.id
+                        expanded = !expanded
+                    }
+                ){
+                    Column(
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .padding(all = 5.dp)
+                    ){
+                        Row(
+                            modifier = modifier
+                                .fillMaxWidth()
+                                .wrapContentWidth(Alignment.CenterHorizontally)
+                        ) {
+                            // title on right, done task on right
+                            Text(
+                                text = it.name,
+                                style = TextStyle(
+                                    fontStyle = FontStyle.Normal,
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                modifier = modifier.align(Alignment.CenterVertically)
+                            )
+
+                            IconButton(
+                                onClick = {
+                                    isTaskDone = !isTaskDone
+                                },
+                                modifier = modifier
+                                    .fillMaxWidth()
+                                    .wrapContentWidth(Alignment.End)
+                            ) {
+                                // icon
+                                Icon(
+                                    painter = if(isTaskDone) painterResource(R.drawable.done_uncheck) else painterResource(R.drawable.done_check),
+                                    contentDescription = "Done"
+                                )
+                            }
+                        }
+
+                        // expanded && id == it.id
+                        if(expanded && id == it.id){
+                            // on expanded, I want make update and delete on inside card too
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                Column(
+                                    modifier = modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        "Create At : ${it.createAt}",
+                                        style = TextStyle(
+                                            fontStyle = FontStyle.Italic
+                                        ),
+                                        modifier = modifier.padding(bottom = 5.dp)
+                                    )
+
+                                    Text(
+                                        "Update At : ${it.updateAt}",
+                                        style = TextStyle(
+                                            fontStyle = FontStyle.Italic
+                                        )
+                                    )
+                                }
+
+                                OutlinedTextField(
+                                    value = twoDoTitleUpdate,
+                                    onValueChange = {
+                                        twoDoTitleUpdate = it
+                                    },
+                                    label = {
+                                        Text("Update ToDo")
+                                    },
+                                    trailingIcon = {
+                                        IconButton(
+                                            onClick = {
+                                                /*do anything*/
+                                            }
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Create,
+                                                contentDescription = "UpdateButton"
+                                            )
+                                        }
+                                    },
+                                    modifier = modifier
+                                        .fillMaxWidth()
+                                        .padding(5.dp, top = 10.dp)
+                                )
+
+                                Spacer(modifier = modifier.padding(top = 10.dp))
+
+                                Button(
+                                    onClick = {
+                                        /*do anything*/
+                                    },
+                                    shape = RoundedCornerShape(20.dp),
+                                    elevation = ButtonDefaults.elevatedButtonElevation(),
+                                    modifier = modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color.Red
+                                    )
+                                ) {
+                                    Text("Delete")
+                                }
+                            }
+                        }
                     }
                 }
             }
