@@ -2,6 +2,7 @@ package com.example.twodoapps.apiService
 
 import android.util.Log
 import com.example.twodoapps.dataClassTodo.Twododata
+import com.example.twodoapps.sharePref.AuthHelper
 import com.example.twodoapps.utils.ApiResult
 import com.google.gson.Gson
 import fuel.FuelBuilder
@@ -15,14 +16,36 @@ object TwoDoService {
     var gson = Gson()
     var fuel = FuelBuilder().build()
 
+    lateinit var authHelper : AuthHelper
+
+    fun initialize(authHelper: AuthHelper){
+        this.authHelper = authHelper
+    }
+
+    private suspend fun getAuthHeader() : Map<String, String>{
+        val token = authHelper.getToken()
+        return if(token != null){
+            mapOf("Content-Type" to "application/json", "Authorization" to "Bearer $token")
+        } else {
+            emptyMap()
+        }
+    }
+
     suspend fun getTodos() : ApiResult<List<Twododata>>{
         return try{
-            val response = fuel.get{BASE_URL}
+            val urlGetTodos = BASE_URL.toHttpUrl().newBuilder().addPathSegment("todos").build() // it similar like : url.com/todos
+            val header = getAuthHeader()
+
+            val response = fuel.get{
+                urlGetTodos
+                headers = header
+            }
 
             when(response.statusCode){
                 200 -> ApiResult.Success(gson.fromJson(response.source.readString(), Array<Twododata>::class.java).toList())
+                201 -> ApiResult.Success(gson.fromJson(response.source.readString(), Array<Twododata>::class.java).toList())
                 else -> ApiResult.Error(
-                    "Server Error : ${response.headers}",
+                    "Server Error : ${response.source.readString()}",
                     response.statusCode
                 )
             }
@@ -33,36 +56,21 @@ object TwoDoService {
 
     }
 
-    suspend fun getTodo(id: String) : ApiResult<List<Twododata>>{
-        return try{
-            var url = BASE_URL.toHttpUrl().newBuilder().addPathSegment(id).build() // it similar like : url.com/id
-            val response = fuel.get{url}
-
-            when(response.statusCode){
-                200 -> ApiResult.Success(gson.fromJson(response.source.readString(), Array<Twododata>::class.java).toList())
-                else -> ApiResult.Error(
-                    "Server Error : ${response.headers}",
-                    response.statusCode
-                )
-            }
-
-        } catch (e : Exception){
-            // catch exception at here
-            ApiResult.Error("Error Network Connection $e", -1)
-        }
-    }
-
     suspend fun addTodo(todo: Twododata) : ApiResult<String>{
         return try{
+            val urlAddTodo = BASE_URL.toHttpUrl().newBuilder().addPathSegment("todos").build() // it similar like : url.com/todos
+            val header = getAuthHeader()
             val response = fuel.post {
-                url = BASE_URL
+                url = urlAddTodo.toString()
                 body = gson.toJson(todo)
+                headers = header
             }
 
             when(response.statusCode){
                 201 -> ApiResult.Success(response.source.readString())
+                200 -> ApiResult.Success(response.source.readString())
                 else -> ApiResult.Error(
-                    "Server Error : ${response.headers}",
+                    "Server Error : ${response.source.readString()}",
                     response.statusCode
                 )
             }
@@ -78,16 +86,19 @@ object TwoDoService {
 
     suspend fun updateTodo(id: String, todo: Twododata) : ApiResult<String>{
         return try{
-            val urlUpdate = BASE_URL.toHttpUrl().newBuilder().addPathSegment(id).build()
+            val urlUpdate = BASE_URL.toHttpUrl().newBuilder().addPathSegment("todos").addPathSegment(id).build() // it similar like : url.com/todos/id
+            val header = getAuthHeader()
             val response = fuel.put {
                 url = urlUpdate.toString()
                 body = gson.toJson(todo)
+                headers = header
             }
 
             when(response.statusCode){
                 201 -> ApiResult.Success(response.source.readString())
+                200 -> ApiResult.Success(response.source.readString())
                 else -> ApiResult.Error(
-                    "Server Error : ${response.headers}",
+                    "Server Error : ${response.source.readString()}",
                     response.statusCode
                 )
             }
@@ -103,15 +114,17 @@ object TwoDoService {
 
     suspend fun deleteTodo(id: String) : ApiResult<String>{
         return try {
-            val urlDelete = BASE_URL.toHttpUrl().newBuilder().addPathSegment(id).build()
+            val urlDelete = BASE_URL.toHttpUrl().newBuilder().addPathSegment("todos").addPathSegment(id).build() // it similar like : url.com/todos/id
+            val header = getAuthHeader()
             val response = fuel.delete {
                 url = urlDelete.toString()
+                headers = header
             }
 
             when(response.statusCode){
                 201 -> ApiResult.Success(response.source.readString())
                 else -> ApiResult.Error(
-                    "Server Error : ${response.headers}",
+                    "Server Error : ${response.source.readString()}",
                     response.statusCode
                 )
             }

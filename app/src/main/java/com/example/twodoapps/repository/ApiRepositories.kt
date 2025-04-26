@@ -13,7 +13,6 @@ class ApiRepositories @Inject constructor(
 
     // for Api Service
     suspend fun getAllTodo() = apiService.getTodos()
-    suspend fun getTodoById(id : String) = apiService.getTodo(id)
     suspend fun addTodo(todo : Twododata) = apiService.addTodo(todo)
     suspend fun updateTodoById(id : String,todo : Twododata) = apiService.updateTodo(id, todo)
     suspend fun deleteTodo(id : String) = apiService.deleteTodo(id)

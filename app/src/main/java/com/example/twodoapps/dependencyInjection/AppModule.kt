@@ -1,12 +1,15 @@
 package com.example.twodoapps.dependencyInjection
 
+import android.content.Context
 import com.example.twodoapps.apiService.TwoDoService
 import com.example.twodoapps.apiService.UserService
 import com.example.twodoapps.repository.ApiRepositories
+import com.example.twodoapps.sharePref.AuthHelper
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import fuel.Fuel
 import fuel.FuelBuilder
@@ -25,9 +28,10 @@ object AppModule {
     }
 
     @Provides
-    fun provideTwoDoService(fuel : HttpLoader, gson: Gson) : TwoDoService {
+    fun provideTwoDoService(fuel : HttpLoader, gson: Gson, authHelper: AuthHelper) : TwoDoService {
         TwoDoService.fuel = fuel
         TwoDoService.gson = gson
+        TwoDoService.initialize(authHelper)
         return TwoDoService
     }
 
@@ -41,5 +45,10 @@ object AppModule {
     @Provides
     fun provideApiRepositories(apiService: TwoDoService, userApiService: UserService): ApiRepositories {
         return ApiRepositories(apiService, userApiService)
+    }
+
+    @Provides
+    fun provideAuthHelper(@ApplicationContext context: Context) : AuthHelper {
+        return AuthHelper(context)
     }
 }

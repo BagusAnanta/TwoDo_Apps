@@ -22,10 +22,6 @@ class TwoDoViewModel @Inject constructor(
     private val _todosState = mutableStateOf<ApiResult<List<Twododata>>>(ApiResult.Loading)
     val todosState : MutableState<ApiResult<List<Twododata>>> = _todosState
 
-    // for get data by id from api
-    private val _getTodosById = mutableStateOf<ApiResult<List<Twododata>>>(ApiResult.Loading)
-    val getTodosById : MutableState<ApiResult<List<Twododata>>> = _getTodosById
-
     // for add data from api
     private val _createTodo = mutableStateOf<ApiResult<String>?>(null)
     val createTodo : MutableState<ApiResult<String>?> = _createTodo
@@ -45,14 +41,6 @@ class TwoDoViewModel @Inject constructor(
             _todosState.value = ApiResult.Loading
             _todosState.value = repository.getAllTodo()
         }
-    }
-
-    // for read data by id from api
-    fun getTodoById(id : String){
-       viewModelScope.launch {
-           _getTodosById.value = ApiResult.Loading
-           _getTodosById.value = repository.getTodoById(id)
-       }
     }
 
     // for add data from api

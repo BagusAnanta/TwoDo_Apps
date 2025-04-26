@@ -30,7 +30,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.twodoapps.dataClassTodo.UserDataClass
+import com.example.twodoapps.sharePref.AuthHelper
 import com.example.twodoapps.ui.theme.TwoDoAppsTheme
+import com.example.twodoapps.utils.ApiResult
 import com.example.twodoapps.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -56,9 +58,11 @@ fun ComponentAppRegister(modifier: Modifier = Modifier, viewModel : UserViewMode
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    var registerState = viewModel.registerState.value
+    var registerState = viewModel.registerToken.value
     val context = LocalContext.current
     val activity = LocalActivity.current
+
+    val authHelper = AuthHelper(context)
 
     Column(
         modifier = modifier.fillMaxSize().padding(16.dp),
@@ -97,10 +101,23 @@ fun ComponentAppRegister(modifier: Modifier = Modifier, viewModel : UserViewMode
             Text("Login")
         }
 
+        when(registerState){
+            is ApiResult.Success -> {
+                authHelper.saveToken(registerState.data)
+            }
+            is ApiResult.Error -> {
+                Log.e("Error", registerState.message)
+            }
+            ApiResult.Loading -> {
+                // nothing
+            }
+        }
+
         // Api Handle at here
         ApiHandleResult(
             result = registerState,
             onSuccess = {
+                authHelper.saveToken(registerState.toString())
                 // intent into main activity
                 var intent = Intent(context, MainActivity::class.java)
                 context.startActivity(intent)

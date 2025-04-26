@@ -19,7 +19,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,11 +30,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.twodoapps.dataClassTodo.UserDataClass
+import com.example.twodoapps.sharePref.AuthHelper
 import com.example.twodoapps.ui.theme.TwoDoAppsTheme
 import com.example.twodoapps.utils.ApiResult
 import com.example.twodoapps.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.lifecycle.HiltViewModel
 
 @AndroidEntryPoint
 class LoginActivity : ComponentActivity() {
@@ -59,9 +58,10 @@ fun ComponentApp(modifier: Modifier = Modifier, viewmodel : UserViewModel = hilt
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    var loginState = viewmodel.loginState.value
+    var loginState = viewmodel.loginToken.value
     var context = LocalContext.current
     var activity = LocalActivity.current
+    var authHelper = AuthHelper(context)
 
     Column(
         modifier = modifier.fillMaxSize().padding(16.dp),
@@ -111,6 +111,18 @@ fun ComponentApp(modifier: Modifier = Modifier, viewmodel : UserViewModel = hilt
             modifier = modifier.fillMaxWidth()
         ) {
             Text("Register")
+        }
+
+        when(loginState){
+            is ApiResult.Success -> {
+                authHelper.saveToken(loginState.data)
+            }
+            is ApiResult.Error -> {
+                Log.e("Error", loginState.message)
+            }
+            ApiResult.Loading -> {
+                // nothing
+            }
         }
 
         // Api Handle at here

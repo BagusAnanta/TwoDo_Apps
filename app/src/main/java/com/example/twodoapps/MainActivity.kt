@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
@@ -30,6 +32,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -43,6 +46,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,8 +63,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.twodoapps.ui.theme.TwoDoAppsTheme
 import com.example.twodoapps.dataClassTodo.Twododata
+import com.example.twodoapps.utils.ApiResult
+import com.example.twodoapps.viewModel.TwoDoViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -100,24 +107,14 @@ fun TopAndBottomComponent(modifier: Modifier = Modifier) {
         },
     ) { innerPadding ->
         ContentApp(
-            data = exampleDataList(),
             innerPaddingValues = innerPadding
         )
     }
 }
 
-fun exampleDataList() : List<Twododata>{
-    return listOf(
-        Twododata("123","Makan"),
-        Twododata("456","Minum"),
-        Twododata("789","Mandi"),
-        Twododata("142","Sekolah")
-    )
-}
-
 
 @Composable
-fun ContentApp(data : List<Twododata>, innerPaddingValues : PaddingValues, modifier : Modifier = Modifier){
+fun ContentApp(viewModel : TwoDoViewModel = hiltViewModel(), innerPaddingValues : PaddingValues, modifier : Modifier = Modifier){
 
     // for state
     // for state done, get data from API
@@ -126,18 +123,24 @@ fun ContentApp(data : List<Twododata>, innerPaddingValues : PaddingValues, modif
     var visible by remember { mutableStateOf(false) }
     var id by remember { mutableStateOf("") }
 
+    var context = LocalContext.current
+
     var twoDoTitleUpdate by remember { mutableStateOf("") }
 
     var twoDoTitle by remember { mutableStateOf("") }
+
+    val twoDoState = viewModel.todosState.value
+
+    LaunchedEffect(Unit){
+        viewModel.getAllTodo()
+    }
 
     Column(
         modifier = Modifier.padding(innerPaddingValues)
     ) {
 
         Card(
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 6.dp
-            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
             modifier = modifier
                 .fillMaxWidth()
                 .height(200.dp)
@@ -183,8 +186,11 @@ fun ContentApp(data : List<Twododata>, innerPaddingValues : PaddingValues, modif
                             onClick = {
                                 /*do anything*/
                                 if(twoDoTitle.isNotEmpty()){
-                                    // if a state not empty
-                                    // save on API
+                                    viewModel.addTodo(
+                                        Twododata(
+                                            name = twoDoTitle
+                                        )
+                                    )
                                 }
                             }
                         ) {
@@ -207,132 +213,151 @@ fun ContentApp(data : List<Twododata>, innerPaddingValues : PaddingValues, modif
             style = TextStyle(fontWeight = FontWeight.Bold)
         )
 
-        // LazyColumn -> if you make list column, you use LazyColumn
-        LazyColumn(
-            modifier = Modifier
-                .padding(10.dp),
-            verticalArrangement = Arrangement.spacedBy(15.dp)
-        ) {
-            items(data){
-                ElevatedCard(
-                    elevation = CardDefaults.elevatedCardElevation(
-                        defaultElevation = 6.dp
-                    ),
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .animateContentSize(),
-                    onClick = {
-                        // place id at here for change value and save id where user choose
-                        id = it.id
-                        expanded = !expanded
-                    }
-                ){
-                    Column(
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .padding(all = 5.dp)
-                    ){
-                        Row(
+        when(twoDoState){
+            is ApiResult.Loading -> {
+                // make loading here
+                CircularProgressIndicator(modifier = modifier.fillMaxSize())
+            }
+            is ApiResult.Success -> {
+                // LazyColumn -> if you make list column, you use LazyColumn
+                LazyColumn(
+                    modifier = Modifier
+                        .padding(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(15.dp)
+                ) {
+                    items(twoDoState.data){
+                        ElevatedCard(
+                            elevation = CardDefaults.elevatedCardElevation(
+                                defaultElevation = 6.dp
+                            ),
                             modifier = modifier
                                 .fillMaxWidth()
-                                .wrapContentWidth(Alignment.CenterHorizontally)
-                        ) {
-                            // title on right, done task on right
-                            Text(
-                                text = it.name,
-                                style = TextStyle(
-                                    fontStyle = FontStyle.Normal,
-                                    fontWeight = FontWeight.SemiBold
-                                ),
-                                modifier = modifier.align(Alignment.CenterVertically)
-                            )
-
-                            IconButton(
-                                onClick = {
-                                    isTaskDone = !isTaskDone
-                                },
+                                .animateContentSize(),
+                            onClick = {
+                                // place id at here for change value and save id where user choose
+                                id = it.id
+                                expanded = !expanded
+                            }
+                        ){
+                            Column(
                                 modifier = modifier
                                     .fillMaxWidth()
-                                    .wrapContentWidth(Alignment.End)
-                            ) {
-                                // icon
-                                Icon(
-                                    painter = if(isTaskDone) painterResource(R.drawable.done_uncheck) else painterResource(R.drawable.done_check),
-                                    contentDescription = "Done"
-                                )
-                            }
-                        }
-
-                        // expanded && id == it.id
-                        if(expanded && id == it.id){
-                            // on expanded, I want make update and delete on inside card too
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                            ) {
-                                Column(
-                                    modifier = modifier.fillMaxWidth()
-                                ) {
-                                    Text(
-                                        "Create At : ${it.createAt}",
-                                        style = TextStyle(
-                                            fontStyle = FontStyle.Italic
-                                        ),
-                                        modifier = modifier.padding(bottom = 5.dp)
-                                    )
-
-                                    Text(
-                                        "Update At : ${it.updateAt}",
-                                        style = TextStyle(
-                                            fontStyle = FontStyle.Italic
-                                        )
-                                    )
-                                }
-
-                                OutlinedTextField(
-                                    value = twoDoTitleUpdate,
-                                    onValueChange = {
-                                        twoDoTitleUpdate = it
-                                    },
-                                    label = {
-                                        Text("Update ToDo")
-                                    },
-                                    trailingIcon = {
-                                        IconButton(
-                                            onClick = {
-                                                /*do anything*/
-                                            }
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Create,
-                                                contentDescription = "UpdateButton"
-                                            )
-                                        }
-                                    },
+                                    .padding(all = 5.dp)
+                            ){
+                                Row(
                                     modifier = modifier
                                         .fillMaxWidth()
-                                        .padding(5.dp, top = 10.dp)
-                                )
-
-                                Spacer(modifier = modifier.padding(top = 10.dp))
-
-                                Button(
-                                    onClick = {
-                                        /*do anything*/
-                                    },
-                                    shape = RoundedCornerShape(20.dp),
-                                    elevation = ButtonDefaults.elevatedButtonElevation(),
-                                    modifier = modifier.fillMaxWidth(),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color.Red
-                                    )
+                                        .wrapContentWidth(Alignment.CenterHorizontally)
                                 ) {
-                                    Text("Delete")
+                                    // title on right, done task on right
+                                    Text(
+                                        text = it.name,
+                                        style = TextStyle(
+                                            fontStyle = FontStyle.Normal,
+                                            fontWeight = FontWeight.SemiBold
+                                        ),
+                                        modifier = modifier.align(Alignment.CenterVertically)
+                                    )
+
+                                    IconButton(
+                                        onClick = {
+                                            isTaskDone = !isTaskDone
+                                        },
+                                        modifier = modifier
+                                            .fillMaxWidth()
+                                            .wrapContentWidth(Alignment.End)
+                                    ) {
+                                        // icon
+                                        Icon(
+                                            painter = if(isTaskDone) painterResource(R.drawable.done_uncheck) else painterResource(R.drawable.done_check),
+                                            contentDescription = "Done"
+                                        )
+                                    }
+                                }
+
+                                // expanded && id == it.id
+                                if(expanded && id == it.id){
+                                    // on expanded, I want make update and delete on inside card too
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                    ) {
+                                        Column(
+                                            modifier = modifier.fillMaxWidth()
+                                        ) {
+                                            Text(
+                                                "Create At : ${it.createAt}",
+                                                style = TextStyle(
+                                                    fontStyle = FontStyle.Italic
+                                                ),
+                                                modifier = modifier.padding(bottom = 5.dp)
+                                            )
+
+                                            Text(
+                                                "Update At : ${it.updateAt}",
+                                                style = TextStyle(
+                                                    fontStyle = FontStyle.Italic
+                                                )
+                                            )
+                                        }
+
+                                        OutlinedTextField(
+                                            value = twoDoTitleUpdate,
+                                            onValueChange = {
+                                                twoDoTitleUpdate = it
+                                            },
+                                            label = {
+                                                Text("Update ToDo")
+                                            },
+                                            trailingIcon = {
+                                                IconButton(
+                                                    onClick = {
+                                                        viewModel.updateTodo(
+                                                            id = it.id,
+                                                            todo = Twododata(
+                                                                name = twoDoTitleUpdate,
+                                                                status = isTaskDone
+                                                            )
+                                                        )
+                                                    }
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Filled.Create,
+                                                        contentDescription = "UpdateButton"
+                                                    )
+                                                }
+                                            },
+                                            modifier = modifier
+                                                .fillMaxWidth()
+                                                .padding(5.dp, top = 10.dp)
+                                        )
+
+                                        Spacer(modifier = modifier.padding(top = 10.dp))
+
+                                        Button(
+                                            onClick = {
+                                                viewModel.deleteTodo(it.id)
+                                            },
+                                            shape = RoundedCornerShape(20.dp),
+                                            elevation = ButtonDefaults.elevatedButtonElevation(),
+                                            modifier = modifier.fillMaxWidth(),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = Color.Red
+                                            )
+                                        ) {
+                                            Text("Delete")
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
+            }
+            is ApiResult.Error -> {
+                // show error message
+                Toast.makeText(context, "Something Wrong!", Toast.LENGTH_SHORT).show()
+                Log.e("Error", twoDoState.message)
             }
         }
     }

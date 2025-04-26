@@ -23,23 +23,23 @@ class UserViewModel @Inject constructor(
     * 2. variable for register and get state
     * 3. function for login and register*/
 
-    private val _loginState = mutableStateOf<ApiResult<Boolean>>(ApiResult.Loading)
-    val loginState : MutableState<ApiResult<Boolean>> = _loginState
+    private val _loginToken = mutableStateOf<ApiResult<String>>(ApiResult.Loading)
+    val loginToken : MutableState<ApiResult<String>> = _loginToken
 
-    private val _registerState = mutableStateOf<ApiResult<Boolean>>(ApiResult.Loading)
-    val registerState : MutableState<ApiResult<Boolean>> = _registerState
+    private val _registerToken = mutableStateOf<ApiResult<String>>(ApiResult.Loading)
+    val registerToken : MutableState<ApiResult<String>> = _registerToken
 
     fun getUsersLogin(data : UserDataClass){
         viewModelScope.launch {
-            _loginState.value = ApiResult.Loading
-            _loginState.value = repository.getUsersLogin(data)
+            _loginToken.value = ApiResult.Loading
+            _loginToken.value = repository.getUsersLogin(data)
         }
     }
 
     fun addUserRegister(data : UserDataClass){
         viewModelScope.launch {
-            _registerState.value = ApiResult.Loading
-            _registerState.value = repository.addUserRegister(data)
+            _registerToken.value = ApiResult.Loading
+            _registerToken.value = repository.addUserRegister(data)
         }
     }
 
