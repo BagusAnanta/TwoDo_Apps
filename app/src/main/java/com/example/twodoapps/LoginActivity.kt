@@ -15,6 +15,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,7 +24,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.twodoapps.ui.theme.TwoDoAppsTheme
+import com.example.twodoapps.utils.ApiResult
+import com.example.twodoapps.viewModel.UserViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,7 +47,7 @@ class LoginActivity : ComponentActivity() {
 }
 
 @Composable
-fun ComponentApp(modifier: Modifier = Modifier) {
+fun ComponentApp(modifier: Modifier = Modifier, viewmodel : UserViewModel = hiltViewModel()) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 

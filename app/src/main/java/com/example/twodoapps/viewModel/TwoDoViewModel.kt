@@ -3,10 +3,12 @@ package com.example.twodoapps.viewModel
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.twodoapps.dataClassTodo.Twododata
 import com.example.twodoapps.repository.ApiRepositories
 import com.example.twodoapps.utils.ApiResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -38,33 +40,43 @@ class TwoDoViewModel @Inject constructor(
 
 
     // for read data from api
-    suspend fun getAllTodo(){
-        _todosState.value = ApiResult.Loading
-        _todosState.value = repository.getAllTodo()
+    fun getAllTodo(){
+        viewModelScope.launch {
+            _todosState.value = ApiResult.Loading
+            _todosState.value = repository.getAllTodo()
+        }
     }
 
     // for read data by id from api
-    suspend fun getTodoById(id : String){
-        _getTodosById.value = ApiResult.Loading
-        _getTodosById.value = repository.getTodoById(id)
+    fun getTodoById(id : String){
+       viewModelScope.launch {
+           _getTodosById.value = ApiResult.Loading
+           _getTodosById.value = repository.getTodoById(id)
+       }
     }
 
     // for add data from api
-    suspend fun addTodo(todo : Twododata){
-        _createTodo.value = ApiResult.Loading
-        _createTodo.value = repository.addTodo(todo)
+    fun addTodo(todo : Twododata){
+        viewModelScope.launch {
+            _createTodo.value = ApiResult.Loading
+            _createTodo.value = repository.addTodo(todo)
+        }
     }
 
     // for update data from api
-    suspend fun updateTodo(id : String, todo : Twododata){
-        _updateTodo.value = ApiResult.Loading
-        _updateTodo.value = repository.updateTodoById(id, todo)
+    fun updateTodo(id : String, todo : Twododata){
+        viewModelScope.launch {
+            _updateTodo.value = ApiResult.Loading
+            _updateTodo.value = repository.updateTodoById(id, todo)
+        }
     }
 
     // for delete data from api
-    suspend fun deleteTodo(id : String){
-        _deleteTodo.value = ApiResult.Loading
-        _deleteTodo.value = repository.deleteTodo(id)
+    fun deleteTodo(id : String){
+        viewModelScope.launch {
+            _deleteTodo.value = ApiResult.Loading
+            _deleteTodo.value = repository.deleteTodo(id)
+        }
     }
 
 

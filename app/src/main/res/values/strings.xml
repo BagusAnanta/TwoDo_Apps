@@ -3,4 +3,5 @@
     <string name="title_activity_create_two_do">CreateTwoDo</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="title_activity_register">RegisterActivity</string>
+    <string name="title_activity_api_handler">ApiHandler</string>
 </resources>
