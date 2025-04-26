@@ -12,8 +12,8 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 object TwoDoService {
     // place Base URL at here
     private const val BASE_URL = "http://172.188.241.74/"
-    private val gson = Gson()
-    private val fuel = FuelBuilder().build()
+    var gson = Gson()
+    var fuel = FuelBuilder().build()
 
     suspend fun getTodos() : ApiResult<List<Twododata>>{
         return try{

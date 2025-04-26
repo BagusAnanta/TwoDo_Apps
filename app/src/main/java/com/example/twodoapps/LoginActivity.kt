@@ -1,7 +1,11 @@
 package com.example.twodoapps
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
@@ -22,14 +26,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.twodoapps.dataClassTodo.UserDataClass
 import com.example.twodoapps.ui.theme.TwoDoAppsTheme
 import com.example.twodoapps.utils.ApiResult
 import com.example.twodoapps.viewModel.UserViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 
+@AndroidEntryPoint
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +58,10 @@ class LoginActivity : ComponentActivity() {
 fun ComponentApp(modifier: Modifier = Modifier, viewmodel : UserViewModel = hiltViewModel()) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    var loginState = viewmodel.loginState.value
+    var context = LocalContext.current
+    var activity = LocalActivity.current
 
     Column(
         modifier = modifier.fillMaxSize().padding(16.dp),
@@ -75,7 +87,14 @@ fun ComponentApp(modifier: Modifier = Modifier, viewmodel : UserViewModel = hilt
         Spacer(modifier = modifier.padding(top = 10.dp))
 
         Button(
-            onClick = { /* Handle login button click */ },
+            onClick = {
+                viewmodel.getUsersLogin(
+                    UserDataClass(
+                        username = username,
+                        password = password
+                    )
+                )
+            },
             modifier = modifier.fillMaxWidth()
         ) {
             Text("Login")
@@ -84,11 +103,31 @@ fun ComponentApp(modifier: Modifier = Modifier, viewmodel : UserViewModel = hilt
         Text("or")
 
         Button(
-            onClick = { /* Handle register button click */ },
+            onClick = {
+                // intent into register activity
+                var intent = Intent(context, RegisterActivity::class.java)
+                context.startActivity(intent)
+            },
             modifier = modifier.fillMaxWidth()
         ) {
             Text("Register")
         }
+
+        // Api Handle at here
+        ApiHandleResult(
+            result = loginState,
+            onSuccess = {
+                // intent into main activity
+                var intent = Intent(context, MainActivity::class.java)
+                context.startActivity(intent)
+                activity?.finish()
+            },
+            onError = {
+                // show error message
+                Toast.makeText(context, "Something Wrong!", Toast.LENGTH_SHORT).show()
+                Log.e("Error", it.toString())
+            }
+        )
     }
 }
 
