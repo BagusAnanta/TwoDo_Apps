@@ -3,6 +3,7 @@ package com.example.twodoapps.dependencyInjection
 import android.content.Context
 import com.example.twodoapps.apiService.TwoDoService
 import com.example.twodoapps.apiService.UserService
+import com.example.twodoapps.cookieJar.PersistentCookieJar
 import com.example.twodoapps.repository.ApiRepositories
 import com.example.twodoapps.sharePref.AuthHelper
 import com.google.gson.Gson
@@ -14,11 +15,18 @@ import dagger.hilt.components.SingletonComponent
 import fuel.Fuel
 import fuel.FuelBuilder
 import fuel.HttpLoader
+import okhttp3.OkHttpClient
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+    val okHttpClient = OkHttpClient.Builder()
+        .cookieJar(PersistentCookieJar())
+        .build()
+
+
     @Provides
     fun provideGson() = Gson()
 

@@ -31,10 +31,12 @@ class ApiHandler : ComponentActivity() {
 fun ApiHandleResult(
     result : ApiResult<*>?,
     onSuccess : () -> Unit = {},
-    onError : (String) -> Unit = {}
+    onError : (String) -> Unit = {},
+    onLoading : () -> Unit = {}
 ){
     LaunchedEffect(result) {
         when(result){
+            is ApiResult.Loading -> onLoading()
             is ApiResult.Success -> onSuccess()
             is ApiResult.Error -> onError(result.message)
             else -> {}

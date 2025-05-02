@@ -31,21 +31,23 @@ object UserService {
             when(response.statusCode){
                 201 -> {
                     // get token
-                    val token = JSONObject(response.source.readString()).getString("token")
-                    ApiResult.Success(token)
+                    val cookieHeader = response.headers["Set-Cookie"]?.firstOrNull()
+                    val token = cookieHeader?.toString()?.substringAfter("token=")?.substringBefore(";")
+                    ApiResult.Success(token ?: ApiResult.Error("Token not found", -1).toString())
                 }
                 200 -> {
                     // get token
-                    val token = JSONObject(response.source.readString()).getString("token")
-                    ApiResult.Success(token)
+                    val cookieHeader = response.headers["Set-Cookie"]?.firstOrNull()
+                    val token = cookieHeader?.toString()?.substringAfter("token=")?.substringBefore(";")
+                    ApiResult.Success(token ?: ApiResult.Error("Token not found", -1).toString())
                 }
                 else -> ApiResult.Error(
-                    "Server Error : ${response.source.readString()}",
+                    "Server Error Login: ${response.source.readString()}",
                     response.statusCode
                 )
             }
         } catch (e : Exception){
-            ApiResult.Error("Error Network Connection $e", -1)
+            ApiResult.Error("Error Network Connection Login $e", -1)
         }
     }
 
@@ -73,12 +75,12 @@ object UserService {
                     ApiResult.Success(token)
                 }
                 else -> ApiResult.Error(
-                    "Server Error : ${response.source.readString()}",
+                    "Server Error Register: ${response.source.readString()}",
                     response.statusCode
                 )
             }
         } catch (e : Exception){
-            ApiResult.Error("Error Network Connection $e", -1)
+            ApiResult.Error("Error Network Connection Register $e", -1)
         }
     }
 

@@ -8,13 +8,21 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -43,11 +52,13 @@ class LoginActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TwoDoAppsTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+              /*  Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     ComponentApp(
                         modifier = Modifier.padding(innerPadding)
                     )
-                }
+                }*/
+
+                ComponentApp()
             }
         }
     }
@@ -57,6 +68,7 @@ class LoginActivity : ComponentActivity() {
 fun ComponentApp(modifier: Modifier = Modifier, viewmodel : UserViewModel = hiltViewModel()) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var loadingState by remember { mutableStateOf(false) }
 
     var loginState = viewmodel.loginToken.value
     var context = LocalContext.current
@@ -64,11 +76,16 @@ fun ComponentApp(modifier: Modifier = Modifier, viewmodel : UserViewModel = hilt
     var authHelper = AuthHelper(context)
 
     Column(
-        modifier = modifier.fillMaxSize().padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier
+            .fillMaxHeight()
+            .wrapContentHeight(Alignment.CenterVertically)
+            .padding(10.dp)
+            .blur(if(loadingState) 5.dp else 0.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text("TwoDO App")
+
+        Spacer(modifier = modifier.padding(bottom = 10.dp))
 
         OutlinedTextField(
             value = username,
@@ -77,6 +94,8 @@ fun ComponentApp(modifier: Modifier = Modifier, viewmodel : UserViewModel = hilt
             modifier = modifier.fillMaxWidth()
         )
 
+        Spacer(modifier = modifier.padding(bottom = 10.dp))
+
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -84,7 +103,7 @@ fun ComponentApp(modifier: Modifier = Modifier, viewmodel : UserViewModel = hilt
             modifier = modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = modifier.padding(top = 10.dp))
+        Spacer(modifier = modifier.padding(bottom = 10.dp))
 
         Button(
             onClick = {
@@ -94,6 +113,8 @@ fun ComponentApp(modifier: Modifier = Modifier, viewmodel : UserViewModel = hilt
                         password = password
                     )
                 )
+
+                loadingState = true
             },
             modifier = modifier.fillMaxWidth()
         ) {
@@ -116,12 +137,13 @@ fun ComponentApp(modifier: Modifier = Modifier, viewmodel : UserViewModel = hilt
         when(loginState){
             is ApiResult.Success -> {
                 authHelper.saveToken(loginState.data)
+                Log.e("Token", loginState.data)
             }
             is ApiResult.Error -> {
                 Log.e("Error", loginState.message)
             }
-            ApiResult.Loading -> {
-                // nothing
+            is ApiResult.Loading -> {
+               // none
             }
         }
 
@@ -133,13 +155,38 @@ fun ComponentApp(modifier: Modifier = Modifier, viewmodel : UserViewModel = hilt
                 var intent = Intent(context, MainActivity::class.java)
                 context.startActivity(intent)
                 activity?.finish()
+                loadingState = false
             },
             onError = {
                 // show error message
                 Toast.makeText(context, "Something Wrong!", Toast.LENGTH_SHORT).show()
                 Log.e("Error", it.toString())
+                loadingState = false
             }
         )
+    }
+
+    if(loadingState){
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = modifier
+                .fillMaxSize()
+                .wrapContentWidth(Alignment.CenterHorizontally)
+        ){
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = modifier
+                        .size(50.dp, 50.dp)
+                )
+
+                Spacer(modifier = modifier.padding(bottom = 10.dp))
+
+                Text("Please Wait")
+            }
+        }
     }
 }
 

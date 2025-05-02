@@ -12,6 +12,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -68,7 +69,9 @@ import com.example.twodoapps.ui.theme.TwoDoAppsTheme
 import com.example.twodoapps.dataClassTodo.Twododata
 import com.example.twodoapps.utils.ApiResult
 import com.example.twodoapps.viewModel.TwoDoViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -184,7 +187,6 @@ fun ContentApp(viewModel : TwoDoViewModel = hiltViewModel(), innerPaddingValues 
                     trailingIcon = {
                         IconButton(
                             onClick = {
-                                /*do anything*/
                                 if(twoDoTitle.isNotEmpty()){
                                     viewModel.addTodo(
                                         Twododata(
@@ -216,7 +218,26 @@ fun ContentApp(viewModel : TwoDoViewModel = hiltViewModel(), innerPaddingValues 
         when(twoDoState){
             is ApiResult.Loading -> {
                 // make loading here
-                CircularProgressIndicator(modifier = modifier.fillMaxSize())
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = modifier
+                        .fillMaxSize()
+                        .wrapContentWidth(Alignment.CenterHorizontally)
+                ){
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = modifier
+                                .size(50.dp, 50.dp)
+                        )
+
+                        Spacer(modifier = modifier.padding(bottom = 10.dp))
+
+                        Text("Please Wait")
+                    }
+                }
             }
             is ApiResult.Success -> {
                 // LazyColumn -> if you make list column, you use LazyColumn
